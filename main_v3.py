@@ -6,7 +6,7 @@
 import os
 import torch
 from dataset import get_dataloaders
-from model import build_model
+from model_v3 import build_model
 from train import train
 from evaluate import evaluate
 
@@ -17,7 +17,7 @@ def main():
     epochs = 20
     lr = 0.001
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    model_name = 'model'          # ← 新增：模型标识，用于图表文件命名
+    model_name = 'model_v3'          # ← 新增：模型标识，用于图表文件命名
     print(f"使用设备: {device}")
 
     # 1. 加载数据

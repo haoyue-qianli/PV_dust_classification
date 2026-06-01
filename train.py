@@ -3,6 +3,7 @@
 - 使用交叉熵损失和 Adam 优化器
 - 每个 epoch 记录训练/验证损失和准确率
 - 训练结束后自动绘制并保存训练曲线图
+- 支持 model_name 参数，不同模型保存为不同文件名，防止覆盖
 """
 
 import torch
@@ -12,11 +13,11 @@ import matplotlib.pyplot as plt
 
 # 设置中文字体，解决图表中文乱码
 plt.rcParams['font.sans-serif'] = ['SimHei', 'Microsoft YaHei', 'DejaVu Sans']
-plt.rcParams['axes.unicode_minus'] = False   # 解决负号显示为方块
+plt.rcParams['axes.unicode_minus'] = False
 import os
 
 
-def plot_training_history(history, save_dir='checkpoints'):
+def plot_training_history(history, save_dir='checkpoints', save_name='training_curves.png'):
     """绘制并保存训练损失和准确率曲线"""
     os.makedirs(save_dir, exist_ok=True)
     epochs = range(1, len(history['train_loss']) + 1)
@@ -44,13 +45,13 @@ def plot_training_history(history, save_dir='checkpoints'):
     plt.grid(True)
 
     plt.tight_layout()
-    save_path = os.path.join(save_dir, 'training_curves.png')
+    save_path = os.path.join(save_dir, save_name)
     plt.savefig(save_path, dpi=150, bbox_inches='tight')
     plt.show()
     print(f"训练曲线图已保存至 {save_path}")
 
 
-def train(model, train_loader, val_loader, epochs=20, lr=0.001, device='cuda'):
+def train(model, train_loader, val_loader, epochs=20, lr=0.001, device='cuda', model_name='model'):
     """
     训练模型
     参数:
@@ -60,6 +61,7 @@ def train(model, train_loader, val_loader, epochs=20, lr=0.001, device='cuda'):
         epochs: 训练轮数
         lr: 学习率
         device: 计算设备 ('cuda' 或 'cpu')
+        model_name: 模型名称，用于保存图表时区分不同模型
     返回:
         字典 {'train_loss':[], 'train_acc':[], 'val_loss':[], 'val_acc':[]}
     """
@@ -124,7 +126,7 @@ def train(model, train_loader, val_loader, epochs=20, lr=0.001, device='cuda'):
               f"Train Loss: {epoch_train_loss:.4f} | Train Acc: {epoch_train_acc:.4f} | "
               f"Val Loss: {epoch_val_loss:.4f} | Val Acc: {epoch_val_acc:.4f}")
 
-    # 训练结束后自动绘图
-    plot_training_history(history)
+    # 训练结束后自动绘图，文件名包含模型名
+    plot_training_history(history, save_name=f'{model_name}_training_curves.png')
 
     return history
