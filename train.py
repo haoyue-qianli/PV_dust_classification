@@ -1,30 +1,38 @@
 """
-训练模块
-- 使用交叉熵损失和 Adam 优化器
+训练模块 - 基础版本
+- 使用交叉熵损失 (CrossEntropyLoss)
+- 优化器: Adam (lr=0.001，默认)
 - 每个 epoch 记录训练/验证损失和准确率
 - 训练结束后自动绘制并保存训练曲线图
-- 支持 model_name 参数，不同模型保存为不同文件名，防止覆盖
+- 支持 model_name 参数，区分不同模型的曲线文件名
 """
 
 import torch
 import torch.nn as nn
 import torch.optim as optim
 import matplotlib.pyplot as plt
+import os
 
 # 设置中文字体，解决图表中文乱码
 plt.rcParams['font.sans-serif'] = ['SimHei', 'Microsoft YaHei', 'DejaVu Sans']
 plt.rcParams['axes.unicode_minus'] = False
-import os
 
 
 def plot_training_history(history, save_dir='checkpoints', save_name='training_curves.png'):
-    """绘制并保存训练损失和准确率曲线"""
+    """
+    绘制并保存训练损失和准确率曲线
+
+    参数:
+        history (dict): 包含 'train_loss', 'train_acc', 'val_loss', 'val_acc' 四个列表的字典
+        save_dir (str): 保存图片的目录
+        save_name (str): 图片文件名
+    """
     os.makedirs(save_dir, exist_ok=True)
     epochs = range(1, len(history['train_loss']) + 1)
 
     plt.figure(figsize=(12, 5))
 
-    # 子图1：损失曲线
+    # 损失曲线
     plt.subplot(1, 2, 1)
     plt.plot(epochs, history['train_loss'], 'b-o', label='训练损失', markersize=4)
     plt.plot(epochs, history['val_loss'], 'r-o', label='验证损失', markersize=4)
@@ -34,7 +42,7 @@ def plot_training_history(history, save_dir='checkpoints', save_name='training_c
     plt.legend()
     plt.grid(True)
 
-    # 子图2：准确率曲线
+    # 准确率曲线
     plt.subplot(1, 2, 2)
     plt.plot(epochs, history['train_acc'], 'b-o', label='训练准确率', markersize=4)
     plt.plot(epochs, history['val_acc'], 'r-o', label='验证准确率', markersize=4)
@@ -53,17 +61,23 @@ def plot_training_history(history, save_dir='checkpoints', save_name='training_c
 
 def train(model, train_loader, val_loader, epochs=20, lr=0.001, device='cuda', model_name='model'):
     """
-    训练模型
+    训练模型（Adam 优化器）
+
     参数:
-        model: 待训练模型
-        train_loader: 训练数据加载器
-        val_loader: 验证数据加载器
-        epochs: 训练轮数
-        lr: 学习率
-        device: 计算设备 ('cuda' 或 'cpu')
-        model_name: 模型名称，用于保存图表时区分不同模型
+        model (torch.nn.Module): 待训练的模型
+        train_loader (DataLoader): 训练数据加载器
+        val_loader (DataLoader): 验证数据加载器
+        epochs (int): 训练轮数
+        lr (float): 学习率
+        device (str): 计算设备 ('cuda' 或 'cpu')
+        model_name (str): 模型标识，用于保存曲线图文件名
+
     返回:
-        字典 {'train_loss':[], 'train_acc':[], 'val_loss':[], 'val_acc':[]}
+        dict: 包含以下键的训练历史记录
+            - 'train_loss': 每轮训练损失列表
+            - 'train_acc':  每轮训练准确率列表
+            - 'val_loss':   每轮验证损失列表
+            - 'val_acc':    每轮验证准确率列表
     """
     model = model.to(device)
     criterion = nn.CrossEntropyLoss()
